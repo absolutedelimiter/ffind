@@ -4,4 +4,6 @@
 *.ilk
 *.log
 *.user
+*.suo
+.vs/
 .vscode/
