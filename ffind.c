@@ -240,8 +240,10 @@ static DWORD WINAPI worker_thread(LPVOID p) {
             }
 
             if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                // avoid cycles via junctions/symlinks
-                if (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) continue;
+                // Only skip reparse points that are "name surrogates" (junctions/symlinks)
+                // to avoid infinite recursion. Non-surrogate reparse points (like OneDrive
+                // or compressed folders) should be traversed.
+                if ((fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) && (fd.dwReserved0 & IO_REPARSE_TAG_RESERVED_TWO)) continue;
 
                 // enqueue subdir
                 wchar_t *copy = wcsdup_heap(full);
